@@ -145,7 +145,7 @@
         <div class="score" id="score">Score: 0</div>
         <div class="player" id="player"></div>
         <div class="game-over" id="game-over">
-            Game Over
+            <div id="final-score">Game Over</div>
             <button class="restart-btn" id="restart-btn">Restart</button>
         </div>
     </div>
@@ -159,6 +159,7 @@
         const board = document.getElementById('game-board');
         const player = document.getElementById('player');
         const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('final-score');
         let playerPosition = 168;
         let isDragging = false;
 
@@ -250,6 +251,11 @@
                     return;
                 }
 
+                // Only check for collisions after enemies are visible
+                if (topPosition >= 0) {
+                    checkCollisionWithPlayer(enemy);
+                }
+
                 enemy.style.top = (topPosition + enemySpeed) + 'px'; // Adjust speed dynamically
 
                 if (topPosition >= window.innerHeight) {
@@ -260,68 +266,68 @@
             }, 50);
         }
 
+        function checkCollisionWithPlayer(enemy) {
+            const playerRect = player.getBoundingClientRect();
+            const enemyRect = enemy.getBoundingClientRect();
+
+            if (
+                playerRect.left < enemyRect.right &&
+                playerRect.right > enemyRect.left &&
+                playerRect.top < enemyRect.bottom &&
+                playerRect.bottom > enemyRect.top
+            ) {
+                endGame();
+            }
+        }
+
         function checkCollision(waterDrop, moveDropInterval) {
             const enemies = document.querySelectorAll('.enemy');
             enemies.forEach(function(enemy) {
                 const dropRect = waterDrop.getBoundingClientRect();
                 const enemyRect = enemy.getBoundingClientRect();
 
-                if (
+                // Only check for collision if the enemy is on screen (top > 0)
+                if (parseFloat(enemy.style.top) > 0 &&
                     dropRect.left < enemyRect.right &&
                     dropRect.right > enemyRect.left &&
                     dropRect.top < enemyRect.bottom &&
                     dropRect.bottom > enemyRect.top
                 ) {
-                    score += 10;
-                    scoreDisplay.innerText = 'Score: ' + score;
-
-                    // Increase speed and spawn rate every 60 points
-                    if (score % 60 === 0) {
-                        enemySpeed += 1; // Increase enemy speed
-                        enemySpawnRate = Math.max(500, enemySpawnRate - 200); // Increase spawn rate, but cap it
-                    }
-
                     enemy.remove();
                     waterDrop.remove();
                     clearInterval(moveDropInterval);
+                    increaseScore();
                 }
             });
         }
 
-        function startSpawningEnemies() {
-            const spawnInterval = setInterval(function() {
-                if (!gameOver) {
-                    spawnEnemy();
-                    // Randomly spawn multiple enemies for challenge
-                    if (score >= 60 && Math.random() > 0.5) {
-                        spawnEnemy();
-                    }
-                }
-            }, enemySpawnRate);
+        function increaseScore() {
+            score += 10;
+            scoreDisplay.textContent = 'Score: ' + score;
 
-            return spawnInterval;
+            // Increase difficulty at every 60 points
+            if (score % 60 === 0) {
+                enemySpeed += 2;
+                enemySpawnRate -= 400; // Reduce spawn rate to increase difficulty
+            }
         }
 
         function endGame() {
             gameOver = true;
+            finalScoreDisplay.textContent = `Game Over! #WashWars Final Score: ${score}`;
             document.getElementById('game-over').style.visibility = 'visible';
-            document.querySelectorAll('.enemy').forEach(function(enemy) {
-                enemy.remove();
-            });
-            document.getElementById('game-over').innerText = 'Game Over #WASHWARS\nScore: ' + score;
         }
 
         document.getElementById('restart-btn').addEventListener('click', function() {
-            score = 0;
-            enemySpeed = 5; // Reset enemy speed
-            enemySpawnRate = 2000; // Reset spawn rate
-            scoreDisplay.innerText = 'Score: ' + score;
-            gameOver = false;
-            document.getElementById('game-over').style.visibility = 'hidden';
-            startSpawningEnemies();
+            window.location.reload();
         });
 
-        startSpawningEnemies();
+        // Spawn enemies at intervals
+        setInterval(function() {
+            if (!gameOver) {
+                spawnEnemy();
+            }
+        }, enemySpawnRate);
     </script>
 </body>
 </html>
