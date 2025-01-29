@@ -306,7 +306,7 @@
             scoreDisplay.textContent = 'Score: ' + score;
 
             // Increase difficulty at every 60 points
-            if (score % 60 === 0) {
+            if (score % 40 === 0) {
                 enemySpeed += 4;
                 enemySpawnRate -= 500; // Reduce spawn rate to increase difficulty
             }
