@@ -155,69 +155,72 @@
     }
 
     /* Enhanced Leaderboard Styles */
-    #leaderboard-container {
-      margin-top: 20px;
-      width: 80%;
-      max-width: 500px;
-      margin: 20px auto 0 auto;
-      background-color: rgba(0,0,0,0.5);
-      border-radius: 10px;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    #leaderboard-container h2 {
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 28px;
-      text-transform: uppercase;
-      color: #ffd000; /* Gold color for the title */
-      letter-spacing: 2px;
-    }
-    #leaderboard-list {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-      max-height: 200px;
-      overflow-y: auto;
-      margin: 0 auto;
-      font-size: 18px;
-      line-height: 1.5;
-      color: #FFF;
-    }
-    #leaderboard-list li {
-      margin: 5px 0;
-      padding: 5px;
-      border-bottom: 1px solid #555;
-    }
-    /* Highlight top 3 players: gold, silver, bronze */
-    #leaderboard-list li:nth-child(1) {
-      color: #FFD700;
-      font-weight: bold;
-    }
-    #leaderboard-list li:nth-child(2) {
-      color: #8a8989;
-      font-weight: bold;
-    }
-    #leaderboard-list li:nth-child(3) {
-      color: #a56526;
-      font-weight: bold;
-    }
+#leaderboard-container {
+  width: 80%;                 /* Default width on larger screens */
+  max-width: 500px;
+  margin: 20px auto;          /* Center horizontally (top=20px, sides=auto, bottom=0) */
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 10px;
+  padding: 20px;
+  box-sizing: border-box;      /* Prevent padding from expanding container width */
+}
 
-    /* Fix for smaller screens */
-    @media (max-width: 480px) {
-      .game-over {
-        font-size: 28px; /* Reduce font so it fits on screen */
-      }
-      #final-score {
-        max-width: 90%;      /* Prevent text overflow */
-        word-wrap: break-word;
-        margin: 0 auto;      /* Center text within container */
-      }
-      #leaderboard-container {
-        width: 90%;          /* Ensure container is centered and not too wide */
-        margin: 10px auto 0 auto;
-      }
-    }
+#leaderboard-container h2 {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 28px;
+  text-transform: uppercase;
+  color: #ffd000; /* Gold color for the title */
+  letter-spacing: 2px;
+}
+
+#leaderboard-list {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #FFF;
+}
+
+#leaderboard-list li {
+  margin: 5px 0;
+  padding: 5px;
+  border-bottom: 1px solid #555;
+}
+
+/* Highlight top 3 players: gold, silver, bronze */
+#leaderboard-list li:nth-child(1) {
+  color: #FFD700;
+  font-weight: bold;
+}
+#leaderboard-list li:nth-child(2) {
+  color: #8a8989;
+  font-weight: bold;
+}
+#leaderboard-list li:nth-child(3) {
+  color: #a56526;
+  font-weight: bold;
+}
+
+/* Fix for smaller screens */
+@media (max-width: 480px) {
+  .game-over {
+    font-size: 28px; /* Reduce font so it fits on screen */
+  }
+  #final-score {
+    max-width: 90%;  /* Prevent text overflow */
+    word-wrap: break-word;
+    margin: 0 auto;  /* Center text within container */
+  }
+  #leaderboard-container {
+    width: 90%;      /* Ensure container is not too wide on small screens */
+    margin: 10px auto;  /* Center horizontally (top=10px, bottom=auto) */
+  }
+}
   </style>
 </head>
 <body>
