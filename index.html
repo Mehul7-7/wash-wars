@@ -67,8 +67,8 @@
     }
     .player {
       position: absolute;
-      width: 210px;
-      height: 210px;
+      width: 200px;
+      height: 200px;
       background: url('assets/soap.png') no-repeat center center;
       background-size: cover;
       bottom: 10px;
@@ -392,23 +392,27 @@
     // --------------------------------------------------
     // Spawn Enemies
     // --------------------------------------------------
-  function getRandomPosition() {
-  const margin = 50;
-  const enemyWidth = 64;
-  const totalWidth = window.innerWidth - margin * 2;
-  const numZones = 3; 
-  const zoneWidth = totalWidth / numZones;
-  
-  // Choose a zone randomly (0, 1, or 2)
-  const zone = Math.floor(Math.random() * numZones);
-  
-  // Within that zone, choose a random position (making sure the enemy fits)
-  const posWithinZone = Math.floor(Math.random() * (zoneWidth - enemyWidth));
-  
-  // Calculate the absolute position (add the left margin and offset for the zone)
-  const finalPos = margin + zone * zoneWidth + posWithinZone;
-  return finalPos + 'px';
-}
+    function spawnEnemy() {
+      const enemyTypes = ['enemy1', 'enemy2', 'enemy3'];
+      const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+
+      const enemy = document.createElement('div');
+      enemy.classList.add('enemy', enemyType);
+      enemy.style.left = getRandomPosition();
+      enemy.style.top = '-64px';
+      board.appendChild(enemy);
+
+      moveEnemy(enemy);
+    }
+
+    function getRandomPosition() {
+      const margin = 50; // margin from sides
+      return (
+        Math.random() * (window.innerWidth - margin * 2 - 64) +
+        margin +
+        'px'
+      );
+    }
 
     function moveEnemy(enemy) {
       const moveInterval = setInterval(function() {
@@ -479,9 +483,9 @@
       scoreDisplay.textContent = 'Score: ' + score;
 
       // Increase difficulty every 40 points
-      if (score % 40 === 0) {
-        enemySpeed += 6;
-        enemySpawnRate = Math.max(400, enemySpawnRate - 500);
+      if (score % 20 === 0) {
+        enemySpeed += 4;
+        enemySpawnRate = Math.max(500, enemySpawnRate - 500);
       }
     }
 
