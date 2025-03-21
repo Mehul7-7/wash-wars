@@ -138,6 +138,7 @@
       z-index: 2;
       text-align: center;
       padding: 20px;
+      box-sizing: border-box;
     }
     .restart-btn {
       margin-top: 20px;
@@ -162,6 +163,7 @@
       background-color: rgba(0,0,0,0.5);
       border-radius: 10px;
       padding: 20px;
+      box-sizing: border-box;
     }
     #leaderboard-container h2 {
       margin-bottom: 10px;
@@ -201,30 +203,19 @@
       font-weight: bold;
     }
 
-    @media (max-width: 768px) {
-      .score {
-        font-size: 20px;
+    /* Fix for smaller screens */
+    @media (max-width: 480px) {
+      .game-over {
+        font-size: 28px; /* Reduce font so it fits on screen */
       }
-      .player {
-        width: 180px;
-        height: 180px;
-      }
-      .water-drop {
-        width: 40px;
-        height: 40px;
-      }
-      .restart-btn {
-        font-size: 16px;
+      #final-score {
+        max-width: 90%;      /* Prevent text overflow */
+        word-wrap: break-word;
+        margin: 0 auto;      /* Center text within container */
       }
       #leaderboard-container {
-        width: 90%;
-        padding: 15px;
-      }
-      #leaderboard-container h2 {
-        font-size: 24px;
-      }
-      #leaderboard-list {
-        font-size: 16px;
+        width: 90%;          /* Ensure container is centered and not too wide */
+        margin: 10px auto 0 auto;
       }
     }
   </style>
@@ -538,33 +529,33 @@
     }
 
     function loadLeaderboard() {
-  // Query top 10 scores in descending order
-  const leaderboardRef = ref(database, 'leaderboard');
-  const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(10));
+      // Query top 10 scores in descending order
+      const leaderboardRef = ref(database, 'leaderboard');
+      const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(10));
 
-  onValue(topScoresQuery, (snapshot) => {
-    const data = snapshot.val();
-    if (!data) {
-      document.getElementById('leaderboard-list').innerHTML = "<li>No scores yet</li>";
-      return;
+      onValue(topScoresQuery, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          document.getElementById('leaderboard-list').innerHTML = "<li>No scores yet</li>";
+          return;
+        }
+
+        // Convert object to array
+        const entries = Object.entries(data).map(([id, value]) => value);
+        // Sort by score descending
+        entries.sort((a, b) => b.score - a.score);
+
+        // Display in <ol id="leaderboard-list">
+        const leaderboardList = document.getElementById('leaderboard-list');
+        leaderboardList.innerHTML = "";
+        
+        entries.forEach((entry, index) => {
+          const li = document.createElement('li');
+          li.textContent = `${index + 1}. ${entry.name}: ${entry.score}`;
+          leaderboardList.appendChild(li);
+        });
+      });
     }
-
-    // Convert object to array
-    const entries = Object.entries(data).map(([id, value]) => value);
-    // Sort by score descending
-    entries.sort((a, b) => b.score - a.score);
-
-    // Display in <ol id="leaderboard-list">
-    const leaderboardList = document.getElementById('leaderboard-list');
-    leaderboardList.innerHTML = "";
-    
-    entries.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.textContent = `${index + 1}. ${entry.name}: ${entry.score}`;
-      leaderboardList.appendChild(li);
-    });
-  });
-}
   </script>
 </body>
 </html>
