@@ -1,333 +1,570 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wash Wars Game-Lifebuoy</title>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background-color: #222;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wash Wars</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #222;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
 
-        .board {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: url('assets/background.png') no-repeat center center;
-            background-size: cover;
-            background-attachment: fixed;
-            overflow: hidden;
-        }
+    /* Start Screen Styles */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 3;
+    }
+    #start-screen h1 {
+      color: white;
+      margin-bottom: 20px;
+    }
+    #start-screen input[type="text"] {
+      padding: 10px;
+      font-size: 18px;
+      width: 300px;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    #start-screen button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #start-screen button:hover {
+      background-color: #218838;
+    }
 
-        .player {
-            position: absolute;
-            width: 230px;
-            height: 230px;
-            background: url('assets/soap.png') no-repeat center center;
-            background-size: cover;
-            bottom: 10px;
-            left: 0;
-            transition: left 0.1s linear;
-        }
+    /* Game Board Styles */
+    .board {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: url('assets/background.png') no-repeat center center;
+      background-size: cover;
+      background-attachment: fixed;
+      overflow: hidden;
+      display: none; /* Hidden by default, shown after "Play" */
+    }
+    .player {
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      background: url('assets/soap.png') no-repeat center center;
+      background-size: cover;
+      bottom: 10px;
+      left: 0;
+      transition: left 0.1s linear;
+    }
+    .water-drop {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-image: url('assets/water-drop.png');
+      background-size: cover;
+      top: -40px;
+    }
+    .enemy {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      background-size: cover;
+    }
+    .enemy1 {
+      background-image: url('assets/enemy1.png');
+    }
+    .enemy2 {
+      background-image: url('assets/enemy2.png');
+    }
+    .enemy3 {
+      background-image: url('assets/enemy3.png');
+    }
 
-        .water-drop {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-image: url('assets/water-drop.png');
-            background-size: cover;
-            top: -40px;
-        }
+    @keyframes moveEnemy {
+      0% {
+        top: -64px;
+      }
+      100% {
+        top: 100%;
+      }
+    }
+    .moving {
+      animation: moveEnemy 5s linear infinite;
+    }
 
-        .enemy {
-            position: absolute;
-            width: 64px;
-            height: 64px;
-            background-size: cover;
-        }
+    .score {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+      z-index: 1;
+    }
 
-        .enemy1 {
-            background-image: url('assets/enemy1.png');
-        }
+    /* Game Over Screen */
+    .game-over {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: rgb(41, 234, 11);
+      font-size: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      flex-direction: column;
+      z-index: 2;
+      text-align: center;
+      padding: 20px;
+    }
+    .restart-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .restart-btn:hover {
+      background-color: #218838;
+    }
 
-        .enemy2 {
-            background-image: url('assets/enemy2.png');
-        }
+    /* Enhanced Leaderboard Styles */
+    #leaderboard-container {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 500px;
+      margin: 20px auto 0 auto;
+      background-color: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    #leaderboard-container h2 {
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 28px;
+      text-transform: uppercase;
+      color: #ffd000; /* Gold color for the title */
+      letter-spacing: 2px;
+    }
+    #leaderboard-list {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 0 auto;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #FFF;
+    }
+    #leaderboard-list li {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #555;
+    }
+    /* Highlight top 3 players: gold, silver, bronze */
+    #leaderboard-list li:nth-child(1) {
+      color: #FFD700;
+      font-weight: bold;
+    }
+    #leaderboard-list li:nth-child(2) {
+      color: #8a8989;
+      font-weight: bold;
+    }
+    #leaderboard-list li:nth-child(3) {
+      color: #a56526;
+      font-weight: bold;
+    }
 
-        .enemy3 {
-            background-image: url('assets/enemy3.png');
-        }
-
-        @keyframes moveEnemy {
-            0% {
-                top: -64px;
-            }
-            100% {
-                top: 100%;
-            }
-        }
-
-        .moving {
-            animation: moveEnemy 5s linear infinite;
-        }
-
-        .score {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            color: white;
-            font-weight: bold;
-            z-index: 1;
-        }
-
-        .game-over {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: rgb(41, 234, 11);
-            font-size: 36px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: hidden;
-            flex-direction: column;
-            z-index: 2;
-            text-align: center;
-        }
-
-        .restart-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .restart-btn:hover {
-            background-color: #218838;
-        }
-
-        @media (max-width: 768px) {
-            .score {
-                font-size: 20px;
-            }
-
-            .player {
-                width: 180px;
-                height: 180px;
-            }
-
-            .water-drop {
-                width: 40px;
-                height: 40px;
-            }
-
-            .restart-btn {
-                font-size: 16px;
-            }
-        }
-
-    </style>
+    @media (max-width: 768px) {
+      .score {
+        font-size: 20px;
+      }
+      .player {
+        width: 180px;
+        height: 180px;
+      }
+      .water-drop {
+        width: 40px;
+        height: 40px;
+      }
+      .restart-btn {
+        font-size: 16px;
+      }
+      #leaderboard-container {
+        width: 90%;
+        padding: 15px;
+      }
+      #leaderboard-container h2 {
+        font-size: 24px;
+      }
+      #leaderboard-list {
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="board" id="game-board">
-        <div class="score" id="score">Score: 0</div>
-        <div class="player" id="player"></div>
-        <div class="game-over" id="game-over">
-            <div id="final-score">Game Over</div>
-            <button class="restart-btn" id="restart-btn">Restart</button>
-        </div>
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <h1>Welcome to Wash Wars</h1>
+    <input type="text" id="user-name" placeholder="Enter your name" />
+    <button id="play-btn">Play</button>
+  </div>
+
+  <!-- Game Board -->
+  <div class="board" id="game-board">
+    <div class="score" id="score">Score: 0</div>
+    <div class="player" id="player"></div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="game-over">
+      <div id="final-score">Game Over</div>
+
+      <!-- Leaderboard Section -->
+      <div id="leaderboard-container">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard-list"></ol>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Restart</button>
     </div>
+  </div>
 
-    <script>
-        // Game variables
-        let gameOver = false;
-        let score = 0;
-        let enemySpeed = 5; // Initial enemy speed
-        let enemySpawnRate = 2000; // Initial enemy spawn rate (2 seconds)
-        const board = document.getElementById('game-board');
-        const player = document.getElementById('player');
-        const scoreDisplay = document.getElementById('score');
-        const finalScoreDisplay = document.getElementById('final-score');
-        let playerPosition = 168;
-        let isDragging = false;
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // --------------------------------------------------
+    // Import Firebase (v9+) modules
+    // --------------------------------------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onValue,
+      orderByChild,
+      query,
+      limitToLast
+    } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
 
-        function movePlayer(direction) {
-            if (direction === 'left' && playerPosition > 0) {
-                playerPosition -= 20;
-            } else if (direction === 'right' && playerPosition < window.innerWidth - 250) {
-                playerPosition += 20;
-            }
-            player.style.left = playerPosition + 'px';
+    // --------------------------------------------------
+    // Firebase Configuration
+    // --------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzwwwiSWVMm8GpY3iotGvyuz58rwRsrqw",
+      authDomain: "wash-wars.firebaseapp.com",
+      databaseURL: "https://wash-wars-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wash-wars",
+      storageBucket: "wash-wars.firebasestorage.app",
+      messagingSenderId: "1098990404182",
+      appId: "1:1098990404182:web:c703267715605286fff1f7",
+      measurementId: "G-C2DSHNTECM"
+    };
+
+    // --------------------------------------------------
+    // Initialize Firebase
+    // --------------------------------------------------
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+
+    // --------------------------------------------------
+    // Game Variables
+    // --------------------------------------------------
+    let gameOver = false;
+    let score = 0;
+    let enemySpeed = 5;         // Initial enemy speed
+    let enemySpawnRate = 2000;  // Initial enemy spawn rate (2 seconds)
+    const board = document.getElementById('game-board');
+    const player = document.getElementById('player');
+    const scoreDisplay = document.getElementById('score');
+    const finalScoreDisplay = document.getElementById('final-score');
+    let playerPosition = 168;
+    let isDragging = false;
+    let userName = "";
+
+    // Start Screen
+    const startScreen = document.getElementById('start-screen');
+    const playBtn = document.getElementById('play-btn');
+
+    // --------------------------------------------------
+    // Show Game Board after clicking "Play"
+    // --------------------------------------------------
+    playBtn.addEventListener('click', function() {
+      userName = document.getElementById('user-name').value.trim();
+      if (userName === "") {
+        alert("Please enter your name to start the game!");
+        return;
+      }
+      startScreen.style.display = 'none';
+      board.style.display = 'block';
+    });
+
+    // --------------------------------------------------
+    // Player Movement
+    // --------------------------------------------------
+    function movePlayer(direction) {
+      if (direction === 'left' && playerPosition > 0) {
+        playerPosition -= 20;
+      } else if (direction === 'right' && playerPosition < window.innerWidth - 250) {
+        playerPosition += 20;
+      }
+      player.style.left = playerPosition + 'px';
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (gameOver) return;
+      if (event.key === 'ArrowLeft' || event.key === 'a') {
+        movePlayer('left');
+      } else if (event.key === 'ArrowRight' || event.key === 'd') {
+        movePlayer('right');
+      }
+    });
+
+    board.addEventListener('touchstart', function(event) {
+      if (gameOver) return;
+      isDragging = true;
+    });
+
+    board.addEventListener('touchmove', function(event) {
+      if (gameOver || !isDragging) return;
+      const touchX = event.touches[0].clientX - board.offsetLeft;
+      playerPosition = Math.min(
+        Math.max(touchX - player.offsetWidth / 2, 0),
+        board.offsetWidth - player.offsetWidth
+      );
+      player.style.left = playerPosition + 'px';
+    });
+
+    board.addEventListener('touchend', function() {
+      isDragging = false;
+    });
+
+    // --------------------------------------------------
+    // Shoot Water Drop
+    // --------------------------------------------------
+    function shootWaterDrop() {
+      const waterDrop = document.createElement('div');
+      waterDrop.classList.add('water-drop');
+      waterDrop.style.left = (playerPosition + player.offsetWidth / 2 - 20) + 'px'; // center
+      waterDrop.style.top = '540px';
+      board.appendChild(waterDrop);
+
+      const moveDropInterval = setInterval(function() {
+        const dropPosition = parseFloat(waterDrop.style.top);
+        waterDrop.style.top = (dropPosition - 10) + 'px';
+
+        if (dropPosition <= 0) {
+          clearInterval(moveDropInterval);
+          waterDrop.remove();
+        }
+        checkCollision(waterDrop, moveDropInterval);
+      }, 20);
+    }
+
+    // Auto-shoot every 500 ms
+    setInterval(function() {
+      if (!gameOver && board.style.display === 'block') {
+        shootWaterDrop();
+      }
+    }, 500);
+
+    // --------------------------------------------------
+    // Spawn Enemies
+    // --------------------------------------------------
+    function spawnEnemy() {
+      const enemyTypes = ['enemy1', 'enemy2', 'enemy3'];
+      const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+
+      const enemy = document.createElement('div');
+      enemy.classList.add('enemy', enemyType);
+      enemy.style.left = getRandomPosition();
+      enemy.style.top = '-64px';
+      board.appendChild(enemy);
+
+      moveEnemy(enemy);
+    }
+
+    function getRandomPosition() {
+      const margin = 50; // margin from sides
+      return (
+        Math.random() * (window.innerWidth - margin * 2 - 64) +
+        margin +
+        'px'
+      );
+    }
+
+    function moveEnemy(enemy) {
+      const moveInterval = setInterval(function() {
+        const topPosition = parseFloat(
+          window.getComputedStyle(enemy).getPropertyValue('top')
+        );
+
+        if (gameOver) {
+          clearInterval(moveInterval);
+          return;
         }
 
-        document.addEventListener('keydown', function(event) {
-            if (gameOver) return;
-
-            if (event.key === 'ArrowLeft' || event.key === 'a') {
-                movePlayer('left');
-            } else if (event.key === 'ArrowRight' || event.key === 'd') {
-                movePlayer('right');
-            }
-        });
-
-        board.addEventListener('touchstart', function(event) {
-            if (gameOver) return;
-            isDragging = true;
-        });
-
-        board.addEventListener('touchmove', function(event) {
-            if (gameOver || !isDragging) return;
-            const touchX = event.touches[0].clientX - board.offsetLeft;
-            playerPosition = Math.min(Math.max(touchX - player.offsetWidth / 2, 0), board.offsetWidth - player.offsetWidth);
-            player.style.left = playerPosition + 'px';
-        });
-
-        board.addEventListener('touchend', function() {
-            isDragging = false;
-        });
-
-        function shootWaterDrop() {
-            const waterDrop = document.createElement('div');
-            waterDrop.classList.add('water-drop');
-            waterDrop.style.left = (playerPosition + player.offsetWidth / 2 - 20) + 'px'; // Fire from center of soap
-            waterDrop.style.top = '540px';
-            board.appendChild(waterDrop);
-
-            const moveDropInterval = setInterval(function() {
-                const dropPosition = parseFloat(waterDrop.style.top);
-                waterDrop.style.top = (dropPosition - 10) + 'px';
-
-                if (dropPosition <= 0) {
-                    clearInterval(moveDropInterval);
-                    waterDrop.remove();
-                }
-
-                checkCollision(waterDrop, moveDropInterval);
-            }, 20);
+        // Check for collision after enemies appear on screen
+        if (topPosition >= 0) {
+          checkCollisionWithPlayer(enemy);
         }
 
-        setInterval(function() {
-            if (!gameOver) {
-                shootWaterDrop();
-            }
-        }, 500);
+        enemy.style.top = (topPosition + enemySpeed) + 'px';
 
-        function spawnEnemy() {
-            const enemyTypes = ['enemy1', 'enemy2', 'enemy3'];
-            const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-
-            const enemy = document.createElement('div');
-            enemy.classList.add('enemy', enemyType);
-            enemy.style.left = getRandomPosition();
-            enemy.style.top = '-64px';
-            board.appendChild(enemy);
-
-            moveEnemy(enemy);
+        if (topPosition >= window.innerHeight) {
+          endGame();
+          clearInterval(moveInterval);
+          enemy.remove();
         }
+      }, 50);
+    }
 
-        function getRandomPosition() {
-            const margin = 50; // Margin from both sides of the screen
-            return Math.random() * (window.innerWidth - margin * 2 - 64) + margin + 'px';
+    // --------------------------------------------------
+    // Collision Checks
+    // --------------------------------------------------
+    function checkCollisionWithPlayer(enemy) {
+      const playerRect = player.getBoundingClientRect();
+      const enemyRect = enemy.getBoundingClientRect();
+
+      if (
+        playerRect.left < enemyRect.right &&
+        playerRect.right > enemyRect.left &&
+        playerRect.top < enemyRect.bottom &&
+        playerRect.bottom > enemyRect.top
+      ) {
+        endGame();
+      }
+    }
+
+    function checkCollision(waterDrop, moveDropInterval) {
+      const enemies = document.querySelectorAll('.enemy');
+      enemies.forEach(function(enemy) {
+        const dropRect = waterDrop.getBoundingClientRect();
+        const enemyRect = enemy.getBoundingClientRect();
+
+        if (
+          parseFloat(enemy.style.top) > 0 &&
+          dropRect.left < enemyRect.right &&
+          dropRect.right > enemyRect.left &&
+          dropRect.top < enemyRect.bottom &&
+          dropRect.bottom > enemyRect.top
+        ) {
+          enemy.remove();
+          waterDrop.remove();
+          clearInterval(moveDropInterval);
+          increaseScore();
         }
+      });
+    }
 
-        function moveEnemy(enemy) {
-            const moveInterval = setInterval(function() {
-                const topPosition = parseFloat(window.getComputedStyle(enemy).getPropertyValue('top'));
+    function increaseScore() {
+      score += 10;
+      scoreDisplay.textContent = 'Score: ' + score;
 
-                if (gameOver) {
-                    clearInterval(moveInterval);
-                    return;
-                }
+      // Increase difficulty every 40 points
+      if (score % 40 === 0) {
+        enemySpeed += 6;
+        enemySpawnRate = Math.max(500, enemySpawnRate - 500);
+      }
+    }
 
-                // Only check for collisions after enemies are visible
-                if (topPosition >= 0) {
-                    checkCollisionWithPlayer(enemy);
-                }
+    // --------------------------------------------------
+    // Game Over
+    // --------------------------------------------------
+    function endGame() {
+      gameOver = true;
+      finalScoreDisplay.textContent = `Game Over, ${userName}! Your Final Score: ${score}`;
+      document.getElementById('game-over').style.visibility = 'visible';
 
-                enemy.style.top = (topPosition + enemySpeed) + 'px'; // Adjust speed dynamically
+      // Submit score to Firebase
+      submitScore(userName, score);
 
-                if (topPosition >= window.innerHeight) {
-                    endGame();
-                    clearInterval(moveInterval);
-                    enemy.remove();
-                }
-            }, 50);
-        }
+      // Load the leaderboard
+      loadLeaderboard();
+    }
 
-        function checkCollisionWithPlayer(enemy) {
-            const playerRect = player.getBoundingClientRect();
-            const enemyRect = enemy.getBoundingClientRect();
+    // --------------------------------------------------
+    // Restart
+    // --------------------------------------------------
+    document.getElementById('restart-btn').addEventListener('click', function() {
+      window.location.reload();
+    });
 
-            if (
-                playerRect.left < enemyRect.right &&
-                playerRect.right > enemyRect.left &&
-                playerRect.top < enemyRect.bottom &&
-                playerRect.bottom > enemyRect.top
-            ) {
-                endGame();
-            }
-        }
+    // Spawn enemies at intervals
+    setInterval(function() {
+      if (!gameOver && board.style.display === 'block') {
+        spawnEnemy();
+      }
+    }, enemySpawnRate);
 
-        function checkCollision(waterDrop, moveDropInterval) {
-            const enemies = document.querySelectorAll('.enemy');
-            enemies.forEach(function(enemy) {
-                const dropRect = waterDrop.getBoundingClientRect();
-                const enemyRect = enemy.getBoundingClientRect();
+    // --------------------------------------------------
+    // Firebase Realtime Database Leaderboard Functions
+    // --------------------------------------------------
+    function submitScore(playerName, playerScore) {
+      // Write to "leaderboard" node
+      const leaderboardRef = ref(database, 'leaderboard');
+      push(leaderboardRef, {
+        name: playerName,
+        score: playerScore,
+        timestamp: Date.now()
+      });
+    }
 
-                // Only check for collision if the enemy is on screen (top > 0)
-                if (parseFloat(enemy.style.top) > 0 &&
-                    dropRect.left < enemyRect.right &&
-                    dropRect.right > enemyRect.left &&
-                    dropRect.top < enemyRect.bottom &&
-                    dropRect.bottom > enemyRect.top
-                ) {
-                    enemy.remove();
-                    waterDrop.remove();
-                    clearInterval(moveDropInterval);
-                    increaseScore();
-                }
-            });
-        }
+    function loadLeaderboard() {
+  // Query top 10 scores in descending order
+  const leaderboardRef = ref(database, 'leaderboard');
+  const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(10));
 
-        function increaseScore() {
-            score += 10;
-            scoreDisplay.textContent = 'Score: ' + score;
+  onValue(topScoresQuery, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) {
+      document.getElementById('leaderboard-list').innerHTML = "<li>No scores yet</li>";
+      return;
+    }
 
-            // Increase difficulty at every 60 points
-            if (score % 40 === 0) {
-                enemySpeed += 4;
-                enemySpawnRate -= 500; // Reduce spawn rate to increase difficulty
-            }
-        }
+    // Convert object to array
+    const entries = Object.entries(data).map(([id, value]) => value);
+    // Sort by score descending
+    entries.sort((a, b) => b.score - a.score);
 
-        function endGame() {
-            gameOver = true;
-            finalScoreDisplay.textContent = `Game Over! #WashWars Final Score: ${score}`;
-            document.getElementById('game-over').style.visibility = 'visible';
-        }
-
-        document.getElementById('restart-btn').addEventListener('click', function() {
-            window.location.reload();
-        });
-
-        // Spawn enemies at intervals
-        setInterval(function() {
-            if (!gameOver) {
-                spawnEnemy();
-            }
-        }, enemySpawnRate);
-    </script>
+    // Display in <ol id="leaderboard-list">
+    const leaderboardList = document.getElementById('leaderboard-list');
+    leaderboardList.innerHTML = "";
+    
+    entries.forEach((entry, index) => {
+      const li = document.createElement('li');
+      li.textContent = `${index + 1}. ${entry.name}: ${entry.score}`;
+      leaderboardList.appendChild(li);
+    });
+  });
+}
+  </script>
 </body>
 </html>
