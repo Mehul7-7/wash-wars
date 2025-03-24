@@ -82,6 +82,52 @@
     #start-screen button:hover {
       background-color: #218838;
     }
+    /* Leaderboard Styles for Start Screen */
+    #leaderboard-container-start {
+      width: 80%;
+      max-width: 500px;
+      margin: 20px auto;
+      background-color: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #leaderboard-container-start h2 {
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 28px;
+      text-transform: uppercase;
+      color: #ffd000;
+      letter-spacing: 2px;
+    }
+    #leaderboard-list-start {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 0 auto;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #FFF;
+    }
+    #leaderboard-list-start li {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #555;
+    }
+    #leaderboard-list-start li:nth-child(1) {
+      color: #FFD700;
+      font-weight: bold;
+    }
+    #leaderboard-list-start li:nth-child(2) {
+      color: #8a8989;
+      font-weight: bold;
+    }
+    #leaderboard-list-start li:nth-child(3) {
+      color: #a56526;
+      font-weight: bold;
+    }
 
     /* Game Board Styles */
     .board {
@@ -179,7 +225,7 @@
     .restart-btn:hover {
       background-color: #218838;
     }
-    /* Enhanced Leaderboard Styles */
+    /* Existing Leaderboard Styles (Game Over) */
     #leaderboard-container {
       width: 80%;
       max-width: 500px;
@@ -234,7 +280,7 @@
         word-wrap: break-word;
         margin: 0 auto;
       }
-      #leaderboard-container {
+      #leaderboard-container, #leaderboard-container-start {
         width: 90%;
         margin: 10px auto;
       }
@@ -253,6 +299,11 @@
     <h1>Welcome to Wash Wars</h1>
     <input type="text" id="user-name" placeholder="Enter your name" />
     <button id="play-btn">Play</button>
+    <!-- Leaderboard on Start Screen -->
+    <div id="leaderboard-container-start">
+      <h2>Leaderboard</h2>
+      <ol id="leaderboard-list-start"></ol>
+    </div>
   </div>
 
   <!-- Game Board -->
@@ -263,7 +314,7 @@
     <!-- Game Over Screen -->
     <div class="game-over" id="game-over">
       <div id="final-score">Game Over</div>
-      <!-- Leaderboard Section -->
+      <!-- Leaderboard Section (Game Over) -->
       <div id="leaderboard-container">
         <h2>Leaderboard</h2>
         <ol id="leaderboard-list"></ol>
@@ -335,6 +386,7 @@
             // Hide preloader and show start screen once all assets are loaded
             preloader.style.display = 'none';
             startScreen.style.display = 'flex';
+            loadLeaderboard(); // load leaderboard for start screen as well
           }
         };
         img.onerror = () => {
@@ -343,6 +395,7 @@
           if (assetsLoaded === assetsToLoad.length) {
             preloader.style.display = 'none';
             startScreen.style.display = 'flex';
+            loadLeaderboard();
           }
         };
       });
@@ -589,22 +642,21 @@
 
       onValue(topScoresQuery, (snapshot) => {
         const data = snapshot.val();
+        let listContent = "";
         if (!data) {
-          document.getElementById('leaderboard-list').innerHTML = "<li>No scores yet</li>";
-          return;
+          listContent = "<li>No scores yet</li>";
+        } else {
+          const entries = Object.entries(data).map(([id, value]) => value);
+          entries.sort((a, b) => b.score - a.score);
+          entries.forEach((entry, index) => {
+            listContent += `<li>${index + 1}. ${entry.name}: ${entry.score}</li>`;
+          });
         }
-
-        const entries = Object.entries(data).map(([id, value]) => value);
-        entries.sort((a, b) => b.score - a.score);
-
-        const leaderboardList = document.getElementById('leaderboard-list');
-        leaderboardList.innerHTML = "";
-        
-        entries.forEach((entry, index) => {
-          const li = document.createElement('li');
-          li.textContent = `${index + 1}. ${entry.name}: ${entry.score}`;
-          leaderboardList.appendChild(li);
-        });
+        // Update both leaderboard lists if they exist
+        const leaderboardListStart = document.getElementById('leaderboard-list-start');
+        if (leaderboardListStart) leaderboardListStart.innerHTML = listContent;
+        const leaderboardListOver = document.getElementById('leaderboard-list');
+        if (leaderboardListOver) leaderboardListOver.innerHTML = listContent;
       });
     }
   </script>
